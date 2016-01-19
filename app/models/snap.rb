@@ -1,0 +1,4 @@
+class Snap < ActiveRecord::Base
+	belongs_to :from_user, class_name: "User", dependent: :delete
+	belongs_to :to_user, class_name: "User"
+end
