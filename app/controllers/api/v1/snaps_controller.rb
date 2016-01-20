@@ -11,19 +11,23 @@ class Api::V1::SnapsController < ApplicationController
     @snaps = @snaps.sort_by &:created_at
 
     json = @snaps.map do |s|
-      { id: s.id, image_url: s.image_url, from_user: s.from_user.json, unread: s.unread, created_at: s.created_at }
+      s.json
     end
 
     render json: json
   end
 
   def show
-    @snap = Snap.find(params[:id])
+    @snap = Snap.where(id: params[:id]).first
     if !@snap
-      return render status: 404
+      return render nothing: true, status: 404
     end
 
-    render json: @snap
+    if @snap.to_user_id != @user.id then
+      return render nothing: true, status: 401
+    end
+
+    render json: @snap.json
   end
 
   def create
@@ -62,19 +66,23 @@ class Api::V1::SnapsController < ApplicationController
       @snaps << snap
     end
 
-    render json: @snaps
+    render json: @snaps.map { |s| s.json }
   end
 
   def mark_as_read
-    @snap = Snap.find(params[:id])
+    @snap = Snap.where(id: params[:id]).first
     if !@snap
-      return render status: 404
+      return render nothing: true, status: 404
+    end
+
+    if @snap.to_user_id != @user.id then
+      return render nothing: true, status: 401
     end
 
     @snap.unread = false
     @snap.image_url = nil
     @snap.save
 
-    render json: @snap
+    render json: @snap.json
   end
 end
