@@ -1,7 +1,14 @@
 class Api::V1::SnapsController < ApplicationController
 
   def index
-    @snaps = Snap.where(to_user_id: @user.id, unread: true)
+    to_snaps = Snap.where(to_user_id: @user.id)
+    from_snaps = Snap.where(from_user_id: @user.id)
+
+    @snaps = []
+    @snaps.concat to_snaps
+    @snaps.concat from_snaps
+
+    @snaps = @snaps.sort_by &:created_at
 
     json = @snaps.map do |s|
       { id: s.id, image_url: s.image_url, from_user: s.from_user.json, unread: s.unread, created_at: s.created_at }

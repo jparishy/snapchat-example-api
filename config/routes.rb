@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       put 'snaps/:id/read', to: 'snaps#mark_as_read'
 
       get 'users/friends', to: 'users#friends'
+      post 'users/authenticate', to: 'users#authenticate'
     end
   end
 end
