@@ -32,6 +32,7 @@ class Api::V1::SnapsController < ApplicationController
 
   def create
     to_user_ids = params[:to]
+    image_url = params[:image_url]
 
     if !to_user_ids.is_a?(Array) then
       to_user_ids = [to_user_ids]
@@ -53,9 +54,11 @@ class Api::V1::SnapsController < ApplicationController
       return render nothing: true, status: 400
     end
 
-    @snaps = []
+    if image_url == nil || image_url.length == 0 then
+      return render nothing: true, status: 400
+    end
 
-    image_url = "http://placekitten.com/1080/1920"
+    @snaps = []
 
     to_users.each do |to_user|
       snap = Snap.create(from_user_id: @user.id, to_user_id: to_user.id)

@@ -10,6 +10,8 @@ Rails.application.routes.draw do
 
       get 'users/friends', to: 'users#friends'
       post 'users/authenticate', to: 'users#authenticate'
+
+      post 'media/upload', to: 'media#upload'
     end
   end
 end
