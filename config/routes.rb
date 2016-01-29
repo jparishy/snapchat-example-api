@@ -10,7 +10,7 @@ Rails.application.routes.draw do
 
       get 'users/friends', to: 'users#friends'
       post 'users/authenticate', to: 'users#authenticate'
-
+      post 'users/push_notification_tokens', to: 'users#add_push_notification_token'
       post 'media/upload', to: 'media#upload'
     end
   end

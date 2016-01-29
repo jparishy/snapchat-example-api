@@ -67,6 +67,9 @@ class Api::V1::SnapsController < ApplicationController
       snap.save
 
       @snaps << snap
+
+      alert = "#{@user.username} sent you a snap."
+      push_notify_user to_user, alert
     end
 
     render json: @snaps.map { |s| s.json }
@@ -87,5 +90,34 @@ class Api::V1::SnapsController < ApplicationController
     @snap.save
 
     render json: @snap.json
+  end
+
+  private
+
+  def apns_client
+    if Rails.env.production?
+      apns = Houston::Client.production
+      apns.certificate = File.read(Rails.root.join("certs", "production.pem"))
+      return apns
+    else
+      apns = Houston::Client.development
+      apns.certificate = File.read(Rails.root.join("certs", "development.pem"))
+      return apns
+    end
+  end
+
+  def push_notify_user(to_user, alert, payload=nil)
+    apns = apns_client
+    apns_tokens = PushNotificationToken.where(user_id: to_user.id)
+    apns_tokens.each do |token|
+      notification = Houston::Notification.new(device: token.value)
+
+      notification.alert = alert
+      notification.custom_data = payload
+
+      apns.push notification
+
+      puts "Error: #{notification.error}." if notification.error
+    end
   end
 end

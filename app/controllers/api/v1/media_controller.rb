@@ -6,6 +6,7 @@ class Api::V1::MediaController < ApplicationController
   def upload
     uploaded_image = params[:file].tempfile
 
+
     file_name = ""
     image_url = ""
 

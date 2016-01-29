@@ -16,6 +16,7 @@ gem 'coffee-rails', '~> 4.1.0'
 
 gem 'bcrypt'
 gem 'aws-sdk-rails'
+gem 'houston'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
