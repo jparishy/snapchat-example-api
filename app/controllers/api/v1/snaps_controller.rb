@@ -34,6 +34,11 @@ class Api::V1::SnapsController < ApplicationController
     to_user_ids = params[:to]
     image_url = params[:image_url]
 
+    force_sandbox = params[:force_sandbox]
+    if force_sandbox == nil || (force_sandbox != true && force_sandbox != false) then
+      force_sandbox = false
+    end
+
     if !to_user_ids.is_a?(Array) then
       to_user_ids = [to_user_ids]
     end
@@ -69,7 +74,7 @@ class Api::V1::SnapsController < ApplicationController
       @snaps << snap
 
       alert = "#{@user.username} sent you a snap."
-      push_notify_user to_user, alert
+      push_notify_user to_user, alert, force_sandbox
     end
 
     render json: @snaps.map { |s| s.json }
@@ -94,20 +99,21 @@ class Api::V1::SnapsController < ApplicationController
 
   private
 
-  def apns_client
-    if Rails.env.production?
+  def apns_client(force_sandbox)
+    production = Rails.env.production?
+    if production && !force_sandbox
       apns = Houston::Client.production
-      apns.certificate = File.read(Rails.root.join("certs", "production.pem"))
+      apns.certificate = File.read(Rails.root.join("certs", "snapchat-apns-prod.pem"))
       return apns
     else
       apns = Houston::Client.development
-      apns.certificate = File.read(Rails.root.join("certs", "development.pem"))
+      apns.certificate = File.read(Rails.root.join("certs", "snapchat-apns-dev.pem"))
       return apns
     end
   end
 
-  def push_notify_user(to_user, alert, payload=nil)
-    apns = apns_client
+  def push_notify_user(to_user, alert, force_sandbox, payload=nil)
+    apns = apns_client force_sandbox
     apns_tokens = PushNotificationToken.where(user_id: to_user.id)
     apns_tokens.each do |token|
       notification = Houston::Notification.new(device: token.value)
